@@ -1,0 +1,115 @@
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Configure Source & Destination Databases</h2>
+
+  <div class="row">
+    <!-- Source Database Configuration -->
+    <div class="col-md-6">
+      <div class="card p-4 shadow">
+        <h4 class="text-primary mb-3">Source Database Configuration</h4>
+        
+        <div class="mb-3">
+          <label class="form-label">Upload Source DB File (Oracle SQL)</label>
+          <input type="file" class="form-control" (change)="onSourceFileSelected($event)" accept=".sql" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Database Type</label>
+          <select class="form-select" [(ngModel)]="source.dbType" name="sourceDbType">
+            <option value="" disabled selected>Select database type</option>
+            <option value="mysql">MySQL</option>
+            <option value="oracle">Oracle</option>
+          </select>
+        </div>
+        
+        <!-- Authentication Options -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-3">Authentication Method</h6>
+          
+          <!-- Username and Password Section -->
+          <div class="border rounded p-3 mb-3">
+            <h6 class="text-secondary mb-2">Credentials</h6>
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" [(ngModel)]="source.username" name="sourceUsername" placeholder="DB Username">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" [(ngModel)]="source.password" name="sourcePassword" placeholder="DB Password">
+            </div>
+          </div>
+          
+          <!-- OR Separator -->
+          <div class="text-center mb-3">
+            <span class="badge bg-secondary">OR</span>
+          </div>
+          
+          <!-- Key Vault Section -->
+          <div class="border rounded p-3">
+            <h6 class="text-secondary mb-2">Key Vault</h6>
+            <div class="mb-3">
+              <label class="form-label">Key Vault</label>
+              <input type="text" class="form-control" [(ngModel)]="source.keyVault" name="sourceKeyVault" placeholder="Key Vault Name/URL">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Destination Database Configuration -->
+    <div class="col-md-6">
+      <div class="card p-4 shadow">
+        <h4 class="text-success mb-3">Destination Database Configuration</h4>
+
+        <div class="mb-3">
+          <label class="form-label">Upload Destination DB File (MySQL SQL)</label>
+          <input type="file" class="form-control" (change)="onDestinationFileSelected($event)" accept=".sql" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Database Type</label>
+          <select class="form-select" [(ngModel)]="destination.dbType" name="destinationDbType">
+            <option value="" disabled selected>Select database type</option>
+            <option value="mysql">MySQL</option>
+            <option value="oracle">Oracle</option>
+          </select>
+        </div>
+        
+        <!-- Authentication Options -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-3">Authentication Method</h6>
+          
+          <!-- Username and Password Section -->
+          <div class="border rounded p-3 mb-3">
+            <h6 class="text-secondary mb-2">Credentials</h6>
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" [(ngModel)]="destination.username" name="destinationUsername" placeholder="DB Username">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" [(ngModel)]="destination.password" name="destinationPassword" placeholder="DB Password">
+            </div>
+          </div>
+          
+          <!-- OR Separator -->
+          <div class="text-center mb-3">
+            <span class="badge bg-secondary">OR</span>
+          </div>
+          
+          <!-- Key Vault Section -->
+          <div class="border rounded p-3">
+            <h6 class="text-secondary mb-2">Key Vault</h6>
+            <div class="mb-3">
+              <label class="form-label">Key Vault</label>
+              <input type="text" class="form-control" [(ngModel)]="destination.keyVault" name="destinationKeyVault" placeholder="Key Vault Name/URL">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <button class="btn btn-primary" (click)="submit()">Next</button>
+  </div>
+</div>

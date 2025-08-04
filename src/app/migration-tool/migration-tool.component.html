@@ -1,0 +1,563 @@
+<div class="min-h-screen bg-gray-100 p-6 font-inter antialiased">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Keep existing form-input and button styles */
+    .form-input {
+      @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2;
+    }
+
+    .btn-primary {
+      @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75;
+    }
+
+    .btn-secondary {
+      @apply bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-75;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #3b82f6;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .font-inter {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+
+  <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
+
+    <header class="text-center mb-10">
+      <h1 class="text-4xl font-extrabold text-blue-800 mb-2">Data Analysis Tool</h1>
+      <p class="text-lg text-gray-600">Tool to analyze and process data from source and destination databases with custom table and column mappings.</p>
+    </header>
+
+    <!-- Connection Status Messages (Moved to top for visibility) -->
+    <div *ngIf="sourceConnectionStatus.message" class="mb-4 p-3 rounded-md text-sm"
+      [ngClass]="{
+          'bg-green-100 text-green-700': sourceConnectionStatus.success === true,
+          'bg-red-100 text-red-700': sourceConnectionStatus.success === false,
+          'bg-blue-100 text-blue-700': sourceConnectionStatus.success === null
+        }">
+      Source DB: {{ sourceConnectionStatus.message }}
+    </div>
+    <div *ngIf="destinationConnectionStatus.message" class="mb-4 p-3 rounded-md text-sm"
+      [ngClass]="{
+          'bg-green-100 text-green-700': destinationConnectionStatus.success === true,
+          'bg-red-100 text-red-700': destinationConnectionStatus.success === false,
+          'bg-blue-100 text-blue-700': destinationConnectionStatus.success === null
+        }">
+      Destination DB: {{ destinationConnectionStatus.message }}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <section class="bg-blue-50 p-6 rounded-lg shadow-inner border border-blue-200">
+        <h2 class="text-2xl font-bold text-blue-700 mb-5 pb-3 border-b border-blue-300">Step 1: Source Database Configuration</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label for="sourceHostname" class="block text-sm font-medium text-gray-700 mb-1">Hostname/IP <span class="text-red-500">*</span></label>
+            <input type="text" id="sourceHostname" [(ngModel)]="sourceDbParams.hostname" name="sourceHostname"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="sourceDbFormErrors['hostname']">
+            <p *ngIf="sourceDbFormErrors['hostname']" class="text-red-500 text-xs mt-1">{{ sourceDbFormErrors['hostname'] }}</p>
+          </div>
+
+          <div>
+            <label for="sourcePort" class="block text-sm font-medium text-gray-700 mb-1">Port <span class="text-red-500">*</span></label>
+            <input type="number" id="sourcePort" [(ngModel)]="sourceDbParams.port" name="sourcePort"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="sourceDbFormErrors['port']">
+            <p *ngIf="sourceDbFormErrors['port']" class="text-red-500 text-xs mt-1">{{ sourceDbFormErrors['port'] }}</p>
+          </div>
+
+          <div>
+            <label for="sourceDbType" class="block text-sm font-medium text-gray-700 mb-1">Database Type <span class="text-red-500">*</span></label>
+            <select id="sourceDbType" [(ngModel)]="sourceDbParams.databaseType" name="sourceDbType"
+                    (change)="onSourceDbTypeChange()"
+                    class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-white"
+                    [class.border-red-500]="sourceDbFormErrors['databaseType']">
+              <option value="">-- Select Type --</option>
+              <option value="MySQL">MySQL</option>
+              <option value="PostgreSQL">PostgreSQL</option>
+              <option value="SQLServer">SQL Server</option>
+              <option value="Oracle">Oracle</option>
+              <option value="H2">H2 (Embedded)</option>
+            </select>
+            <p *ngIf="sourceDbFormErrors['databaseType']" class="text-red-500 text-xs mt-1">{{ sourceDbFormErrors['databaseType'] }}</p>
+          </div>
+
+          <div>
+            <label for="sourceDbName" class="block text-sm font-medium text-gray-700 mb-1">Database Name <span class="text-red-500">*</span></label>
+            <input type="text" id="sourceDbName" [(ngModel)]="sourceDbParams.databaseName" name="sourceDbName"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="sourceDbFormErrors['databaseName']">
+            <p *ngIf="sourceDbFormErrors['databaseName']" class="text-red-500 text-xs mt-1">{{ sourceDbFormErrors['databaseName'] }}</p>
+          </div>
+
+          <div>
+            <label for="sourceUsername" class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
+            <input type="text" id="sourceUsername" [(ngModel)]="sourceDbParams.username" name="sourceUsername"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="sourceDbFormErrors['username']">
+            <p *ngIf="sourceDbFormErrors['username']" class="text-red-500 text-xs mt-1">{{ sourceDbFormErrors['username'] }}</p>
+          </div>
+
+          <div>
+            <label for="sourcePassword" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+            <input type="password" id="sourcePassword" [(ngModel)]="sourceDbParams.password" name="sourcePassword"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="sourceDbFormErrors['password']">
+            <p *ngIf="sourceDbFormErrors['password']" class="text-red-500 text-xs mt-1">{{ sourceDbFormErrors['password'] }}</p>
+          </div>
+        </div>
+
+        <!-- OR Separator -->
+        <div class="text-center mb-4">
+          <span class="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">OR</span>
+        </div>
+
+        <!-- Key Vault Section -->
+        <div class="mb-6">
+          <div>
+            <label for="sourceKeyVault" class="block text-sm font-medium text-gray-700 mb-1">Key Vault</label>
+            <input type="text" id="sourceKeyVault" name="sourceKeyVault" placeholder="Enter Key"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out">
+          </div>
+        </div>
+
+        <div class="flex space-x-4">
+          <button (click)="testSourceConnection()"
+                  class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition duration-150 ease-in-out">
+            Test Connection
+          </button>
+          <!-- NEW: Save Profile Button for Source -->
+          <!-- <button (click)="saveSourceProfile()"
+                  [disabled]="!isSourceConnected"
+                  class="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+            Save Profile
+          </button> -->
+          <span class="text-sm font-mono self-center text-gray-700">Connected: {{ isSourceConnected }}</span>
+        </div>
+
+        <!-- Source Table Selection - ONLY show if connected -->
+        <div *ngIf="sourceSchema.length > 0 && isSourceConnected" class="mt-8 bg-white p-5 rounded-lg shadow-md border border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">Select Source Table</h3>
+            <div class="mb-4">
+                <label for="sourceTableSelect" class="block text-sm font-medium text-gray-700 mb-1">Source Table:</label>
+                <select id="sourceTableSelect" [(ngModel)]="selectedSourceTableName" (change)="onSourceTableSelected($event)"
+                        class="w-full p-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out bg-white">
+                    <option value="">-- Select a table --</option>
+                    <option *ngFor="let table of sourceSchema" [value]="table.name">{{ table.name }} ({{ table.columns.length }} columns)</option>
+                </select>
+            </div>
+            <button *ngIf="selectedSourceTableName" (click)="viewTableData(sourceDbParams.databaseName, selectedSourceTableName, 'source')"
+                    class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out mt-2">
+                View Data
+            </button>
+        </div>
+      </section>
+
+      <section class="bg-purple-50 p-6 rounded-lg shadow-inner border border-purple-200">
+        <h2 class="text-2xl font-bold text-purple-700 mb-5 pb-3 border-b border-purple-300">Step 2: Destination Database Configuration</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label for="destHostname" class="block text-sm font-medium text-gray-700 mb-1">Hostname/IP <span class="text-red-500">*</span></label>
+            <input type="text" id="destHostname" [(ngModel)]="destinationDbParams.hostname" name="destHostname"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="destinationDbFormErrors['hostname']">
+            <p *ngIf="destinationDbFormErrors['hostname']" class="text-red-500 text-xs mt-1">{{ destinationDbFormErrors['hostname'] }}</p>
+          </div>
+
+          <div>
+            <label for="destPort" class="block text-sm font-medium text-gray-700 mb-1">Port <span class="text-red-500">*</span></label>
+            <input type="number" id="destPort" [(ngModel)]="destinationDbParams.port" name="destPort"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="destinationDbFormErrors['port']">
+            <p *ngIf="destinationDbFormErrors['port']" class="text-red-500 text-xs mt-1">{{ destinationDbFormErrors['port'] }}</p>
+          </div>
+
+          <div>
+            <label for="destDbType" class="block text-sm font-medium text-gray-700 mb-1">Database Type <span class="text-red-500">*</span></label>
+            <select id="destDbType" [(ngModel)]="destinationDbParams.databaseType" name="destDbType"
+                    (change)="onDestinationDbTypeChange()"
+                    class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out bg-white"
+                    [class.border-red-500]="destinationDbFormErrors['databaseType']">
+              <option value="">-- Select Type --</option>
+              <option value="MySQL">MySQL</option>
+              <option value="PostgreSQL">PostgreSQL</option>
+              <option value="SQLServer">SQL Server</option>
+              <option value="Oracle">Oracle</option>
+              <option value="H2">H2 (Embedded)</option>
+            </select>
+            <p *ngIf="destinationDbFormErrors['databaseType']" class="text-red-500 text-xs mt-1">{{ destinationDbFormErrors['databaseType'] }}</p>
+          </div>
+
+          <div>
+            <label for="destDbName" class="block text-sm font-medium text-gray-700 mb-1">Database Name <span class="text-red-500">*</span></label>
+            <input type="text" id="destDbName" [(ngModel)]="destinationDbParams.databaseName" name="destDbName"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="destinationDbFormErrors['databaseName']">
+            <p *ngIf="destinationDbFormErrors['databaseName']" class="text-red-500 text-xs mt-1">{{ destinationDbFormErrors['databaseName'] }}</p>
+          </div>
+
+          <div>
+            <label for="destUsername" class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
+            <input type="text" id="destUsername" [(ngModel)]="destinationDbParams.username" name="destUsername"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="destinationDbFormErrors['username']">
+            <p *ngIf="destinationDbFormErrors['username']" class="text-red-500 text-xs mt-1">{{ destinationDbFormErrors['username'] }}</p>
+          </div>
+
+          <div>
+            <label for="destPassword" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+            <input type="password" id="destPassword" [(ngModel)]="destinationDbParams.password" name="destPassword"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out"
+                   [class.border-red-500]="destinationDbFormErrors['password']">
+            <p *ngIf="destinationDbFormErrors['password']" class="text-red-500 text-xs mt-1">{{ destinationDbFormErrors['password'] }}</p>
+          </div>
+        </div>
+
+        <!-- OR Separator -->
+        <div class="text-center mb-4">
+          <span class="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">OR</span>
+        </div>
+
+        <!-- Key Vault Section -->
+        <div class="mb-6">
+          <div>
+            <label for="destKeyVault" class="block text-sm font-medium text-gray-700 mb-1">Key Vault</label>
+            <input type="text" id="destKeyVault" name="destKeyVault" placeholder="Enter Key"
+                   class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out">
+          </div>
+        </div>
+
+        <div class="flex space-x-4">
+          <button (click)="testDestinationConnection()"
+                  class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition duration-150 ease-in-out">
+            Test Connection
+          </button>
+          <!-- NEW: Save Profile Button for Destination -->
+          <!-- <button (click)="saveDestinationProfile()"
+                  [disabled]="!isDestinationConnected"
+                  class="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+            Save Profile
+          </button> -->
+          <span class="text-sm font-mono self-center text-gray-700">Connected: {{ isDestinationConnected }}</span>
+        </div>
+
+        <!-- Destination Table Selection - ONLY show if connected -->
+        <div *ngIf="destinationSchema.length > 0 && isDestinationConnected" class="mt-8 bg-white p-5 rounded-lg shadow-md border border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">Select Destination Table</h3>
+            <div class="mb-4">
+                <label for="destinationTableSelect" class="block text-sm font-medium text-gray-700 mb-1">Destination Table:</label>
+                <select id="destinationTableSelect" [(ngModel)]="selectedDestinationTableName" (change)="onDestinationTableSelected($event)"
+                        class="w-full p-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out bg-white">
+                    <option value="">-- Select a table --</option>
+                    <option *ngFor="let table of destinationSchema" [value]="table.name">{{ table.name }} ({{ table.columns.length }} columns)</option>
+                </select>
+            </div>
+            <button *ngIf="selectedDestinationTableName" (click)="viewTableData(destinationDbParams.databaseName, selectedDestinationTableName, 'destination')"
+                    class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out mt-2">
+                View Data
+            </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Column Mapping Section (Step 3) - ONLY show if both connected and tables selected -->
+    <div *ngIf="isSourceConnected && isDestinationConnected && selectedSourceTableName && selectedDestinationTableName" class="mt-8 p-6 bg-gray-100 rounded-lg shadow-lg border border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-800 mb-5 pb-3 border-b border-gray-300">Step 3: Column Mapping Configuration</h2>
+      <p class="text-sm text-gray-600 mb-4">Map columns from '<span class="font-semibold">{{ selectedSourceTableName }}</span>' to '<span class="font-semibold">{{ selectedDestinationTableName }}</span>'. Ensure data types are compatible.</p>
+
+      <div class="mb-4 flex justify-between items-center">
+        <div>
+          <button (click)="addColumnMapping()"
+                  class="px-4 py-2 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition duration-150 ease-in-out flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add Mapping Row
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-300 rounded-lg overflow-hidden">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Primary Source Column</th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Secondary Source Column</th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Source Type</th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Destination Column</th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Destination Type</th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Transformation</th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <ng-container *ngIf="columnMappings.length === 0">
+              <tr>
+                <td colspan="9" class="px-4 py-3 text-center text-gray-500 italic">No column mappings defined. Click 'Add Mapping Row' to begin.</td>
+              </tr>
+            </ng-container>
+            <ng-container *ngFor="let mapping of columnMappings; let i = index">
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <select [(ngModel)]="mapping.sourceColumn" (ngModelChange)="validateMapping(mapping)"
+                          [compareWith]="compareColumns" name="sourceCol_{{i}}"
+                          class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                    <option [ngValue]="null" disabled>Select Primary Source</option>
+                    <option *ngFor="let col of getAvailableSourceColumnsForMapping(mapping)" [ngValue]="col">{{ col.name }}</option>
+                  </select>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <ng-container *ngIf="showSecondarySourceColumn(mapping)">
+                    <select [(ngModel)]="mapping.secondarySourceColumn" (ngModelChange)="validateMapping(mapping)"
+                            [compareWith]="compareColumns" name="secondarySourceCol_{{i}}"
+                            class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                      <option [ngValue]="null">No Secondary Source</option>
+                      <option *ngFor="let col of getAvailableSecondarySourceColumnsForMapping(mapping)" [ngValue]="col">{{ col.name }}</option>
+                    </select>
+                  </ng-container>
+                  <ng-container *ngIf="!showSecondarySourceColumn(mapping)">
+                    <span class="text-gray-400 italic text-sm">N/A</span>
+                  </ng-container>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{{ mapping.sourceColumn?.dataType || 'N/A' }}</td>
+                <td></td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <select [(ngModel)]="mapping.destinationColumn" (ngModelChange)="validateMapping(mapping)"
+                          [compareWith]="compareColumns" name="destCol_{{i}}"
+                          class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm bg-white">
+                    <option [ngValue]="null" disabled>Select Destination Column</option>
+                    <option *ngFor="let col of getAvailableDestinationColumnsForMapping(mapping)" [ngValue]="col">{{ col.name }}</option>
+                  </select>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{{ mapping.destinationColumn?.dataType || 'N/A' }}</td>
+
+                <!-- Transformation Selection Column (UPDATED) -->
+                <td class="px-4 py-3">
+                  <div class="flex flex-col space-y-2">
+                    <select [(ngModel)]="mapping.transformationMode" (ngModelChange)="onTransformationModeChange(mapping)"
+                            name="transformationMode_{{i}}"
+                            class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                      <option value="NONE">None</option>
+                      <option value="SUGGESTED" [disabled]="!mapping.suggestedTransformationType">
+                        Suggested Transformation
+                      </option>
+                      <option value="CUSTOM_COMMAND">Custom Command</option>
+                    </select>
+
+                    <ng-container *ngIf="mapping.transformationMode === 'SUGGESTED' && mapping.suggestedTransformationType">
+                      <span class="text-blue-600 text-xs font-medium mt-1">
+                        ({{ getSuggestedTransformationDisplayName(mapping.suggestedTransformationType) }})
+                      </span>
+                    </ng-container>
+
+                    <ng-container *ngIf="mapping.transformationMode === 'CUSTOM_COMMAND'">
+                      <input type="text" [(ngModel)]="mapping.customCommand" (ngModelChange)="validateMapping(mapping)"
+                             name="customCommand_{{i}}"
+                             placeholder="e.g., prepend('Mr/Ms.')"
+                             class="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm mt-1"
+                             [class.border-red-500]="mapping.transformationMode === 'CUSTOM_COMMAND' && !mapping.customCommand?.trim()">
+                      <p *ngIf="mapping.transformationMode === 'CUSTOM_COMMAND' && !mapping.customCommand?.trim()" class="text-red-500 text-xs mt-1">
+                        Custom command cannot be empty.
+                      </p>
+                    </ng-container>
+                  </div>
+                </td>
+
+                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                  <ng-container *ngIf="!mapping.sourceColumn || !mapping.destinationColumn">
+                    <span class="text-gray-500 italic">Pending</span>
+                  </ng-container>
+                  <ng-container *ngIf="mapping.sourceColumn && mapping.destinationColumn">
+                    <span *ngIf="!mapping.isValid" class="text-red-600 font-semibold flex items-center">
+                      ❌ Invalid
+                    </span>
+                    <span *ngIf="mapping.isValid && (mapping.validationMessage?.includes('Potential Issues:') || mapping.validationMessage?.includes('Warning:'))" class="text-yellow-600 font-semibold flex items-center">
+                      ⚠️ Valid (Warning)
+                    </span>
+                    <span *ngIf="mapping.isValid && !(mapping.validationMessage?.includes('Potential Issues:') || mapping.validationMessage?.includes('Warning:'))" class="text-green-600 font-semibold flex items-center">
+                      ✅ Valid
+                    </span>
+                  </ng-container>
+                  <p *ngIf="mapping.validationMessage && (mapping.validationMessage?.includes('CRITICAL') || mapping.validationMessage?.includes('Duplicate mapping'))" class="text-red-500 text-xs mt-1">{{ mapping.validationMessage }}</p>
+                  <p *ngIf="mapping.validationMessage && mapping.isValid && (mapping.validationMessage?.includes('Potential Issues:') || mapping.validationMessage?.includes('Warning:'))" class="text-orange-500 text-xs mt-1">
+                    {{ mapping.validationMessage }}
+                  </p>
+                  <p *ngIf="mapping.validationMessage && mapping.isValid && !(mapping.validationMessage?.includes('Potential Issues:') || mapping.validationMessage?.includes('Warning:') || mapping.validationMessage?.includes('Transformation'))" class="text-gray-500 text-xs mt-1">
+                      {{ mapping.validationMessage }}
+                  </p>
+                  <p *ngIf="mapping.validationMessage && mapping.isValid && mapping.validationMessage?.includes('Transformation')" class="text-blue-500 text-xs mt-1">
+                      {{ mapping.validationMessage }}
+                  </p>
+                </td>
+
+                <td class="px-4 py-3 whitespace-nowrap text-center">
+                  <button (click)="removeColumnMapping(i)"
+                          class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm1 3a1 1 0 100 2h4a1 1 0 100-2H8z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="showMappingError" class="mt-4 text-red-600 text-sm font-semibold text-center">
+        {{ migrationMessage }}
+      </p>
+    </div>
+    <!-- Proceed Button -->
+    <div class="mt-8 text-center">
+      <button (click)="navigateToMockDashboardAndSaveConfig()"
+              [disabled]="!allMappingsValid()"
+              class="px-8 py-3 bg-purple-600 text-white font-bold rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+        Proceed to Dashboard
+      </button>
+    </div>
+
+    <!-- ML Suggestions Panel (Step 2.5) - Show if ML suggestions are available -->
+    <div *ngIf="isSourceConnected && isDestinationConnected && mlSuggestions.length > 0" class="mt-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow-lg border border-purple-200">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-purple-800">🤖 AI Mapping Suggestions</h2>
+        <button (click)="toggleMlSuggestionsPanel()"
+                class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75 transition duration-150 ease-in-out">
+          {{ showMlSuggestionsPanel ? 'Hide' : 'Show' }} Suggestions ({{ getMlSuggestionsForCurrentTables().length }})
+        </button>
+      </div>
+
+      <div *ngIf="showMlSuggestionsPanel && getMlSuggestionsForCurrentTables().length > 0" class="space-y-3">
+        <p class="text-sm text-purple-700 mb-4">
+          Our AI has analyzed your database schemas and suggests the following column mappings based on similarity and data patterns:
+        </p>
+
+        <div class="grid gap-3">
+          <div *ngFor="let suggestion of getMlSuggestionsForCurrentTables()" 
+               class="bg-white p-4 rounded-lg border border-purple-200 shadow-sm hover:shadow-md transition-shadow duration-150">
+            <div class="flex justify-between items-center">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-2">
+                  <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {{ suggestion.sourceColumnName }}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {{ suggestion.destinationColumnName }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                  <div class="flex items-center">
+                    <span class="font-medium">Confidence:</span>
+                    <div class="ml-2 bg-gray-200 rounded-full h-2 w-20">
+                      <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" 
+                           [style.width.%]="suggestion.confidence * 100"></div>
+                    </div>
+                    <span class="ml-2">{{ (suggestion.confidence * 100).toFixed(1) }}%</span>
+                  </div>
+                  <div *ngIf="suggestion.suggestionType" class="flex items-center">
+                    <span class="font-medium">Type:</span>
+                    <span class="ml-1 bg-gray-100 px-2 py-1 rounded text-xs">{{ suggestion.suggestionType }}</span>
+                  </div>
+                </div>
+                
+                <div *ngIf="suggestion.reasoning" class="mt-2 text-sm text-gray-700 bg-gray-50 p-2 rounded">
+                  <span class="font-medium">Reasoning:</span> {{ suggestion.reasoning }}
+                </div>
+              </div>
+              
+              <button (click)="applyMlSuggestion(suggestion)"
+                      class="ml-4 px-4 py-2 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition duration-150 ease-in-out">
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="showMlSuggestionsPanel && getMlSuggestionsForCurrentTables().length === 0" class="text-center py-4">
+        <p class="text-gray-600">No ML suggestions available for the current table selection.</p>
+      </div>
+    </div>
+
+    <!-- Data Preview Modal -->
+    <div *ngIf="showDataPreviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-800">Data Preview: {{ previewTableName }}</h2>
+          <button (click)="closeDataPreviewModal()" class="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 overflow-auto flex-grow">
+          <div *ngIf="previewTableData.rows.length === 0" class="text-center text-gray-500 p-4">
+            No data available for this table.
+          </div>
+          <div *ngIf="previewTableData.rows.length > 0" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th *ngFor="let header of previewTableData.headers" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {{ header }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let row of previewTableData.rows">
+                  <td *ngFor="let header of previewTableData.headers" class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                    {{ row[header.toLowerCase()] }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="p-4 border-t border-gray-200 text-right">
+          <button (click)="closeDataPreviewModal()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Close</button>
+        </div>
+      </div>
+    </div>
+
+  </div>

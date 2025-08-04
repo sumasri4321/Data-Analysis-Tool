@@ -1,0 +1,127 @@
+<!-- <h2>Migration Dashboard</h2>
+
+<h3>Saved Connection Profiles:</h3>
+<div *ngIf="savedProfiles.length > 0; else noProfiles">
+  <div *ngFor="let profile of savedProfiles" class="profile-card">
+    <h4>{{ profile.name }}</h4>
+    <p><strong>DB Type:</strong> {{ profile.dbType }}</p>
+    <p><strong>JDBC URL:</strong> {{ profile.jdbcUrl }}</p>
+    <p><strong>Username:</strong> {{ profile.username }}</p>
+    <p *ngIf="profile.schemaFilePath"><strong>Schema Path:</strong> {{ profile.schemaFilePath }}</p>
+    <p *ngIf="profile.dataFilePath"><strong>Data Path:</strong> {{ profile.dataFilePath }}</p>
+    <hr>
+  </div>
+</div>
+<ng-template #noProfiles>
+  <p>No connection profiles saved yet. Please go back to the first page and save one.</p>
+</ng-template>
+
+<h4>Database Tables & Attribute Selection (Coming Soon)</h4> -->
+<!-- src/app/pages/migration-dashboard/migration-dashboard.component.html -->
+
+<!-- <div class="container mt-4">
+  <h2 class="text-center text-primary mb-4">Migration Dashboard</h2>
+
+  <div *ngIf="savedProfiles.length > 0; else noProfiles">
+    <h3>Available Connection Profiles:</h3>
+    <div class="row">
+      <div *ngFor="let profile of savedProfiles" class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ profile.name }}</h5>
+            <p class="card-text">
+              <strong>ID:</strong> {{ profile.id }}<br>
+              <strong>DB Type:</strong> {{ profile.dbType }}<br>
+              <strong>JDBC URL:</strong> {{ profile.jdbcUrl }}<br>
+              <strong>Username:</strong> {{ profile.username }}<br>
+              <span *ngIf="profile.schemaFilePath"><strong>Schema File:</strong> {{ profile.schemaFilePath?.split('\\').pop()?.split('/').pop() }}</span><br>
+              <span *ngIf="profile.dataFilePath"><strong>Data File:</strong> {{ profile.dataFilePath?.split('\\').pop()?.split('/').pop() }}</span>
+            </p>
+            <button class="btn btn-sm btn-info me-2">Select for Migration</button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #noProfiles>
+    <div class="alert alert-warning text-center" role="alert">
+      No connection profiles saved yet. Please go to "Configure Databases" to add source and destination configurations.
+    </div>
+  </ng-template>
+
+  <hr class="my-5">
+
+  <h3 class="text-center text-success mb-4">Data Migration Setup: Table & Attribute Mapping</h3>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h4>Source Database Tables:</h4>
+      <div class="alert alert-info">
+        Select a profile above to load its tables.
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4>Destination Database Tables:</h4>
+      <div class="alert alert-info">
+        Select a profile above to load its tables.
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg" disabled>Start Data Migration (Coming Soon)</button>
+  </div>
+</div> -->
+<div class="container mt-4">
+  <h2 class="text-center text-primary mb-4">Migration Dashboard</h2>
+
+  <div *ngIf="savedProfiles.length > 0; else noProfiles">
+    <h3>Available Connection Profiles:</h3>
+    <div class="row">
+      <div *ngFor="let profile of savedProfiles" class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ profile.name }}</h5>
+            <p class="card-text">
+              <strong>ID:</strong> {{ profile.id }}<br>
+              <strong>DB Type:</strong> {{ profile.dbType }}<br>
+              <strong>JDBC URL:</strong> {{ profile.jdbcUrl }}<br>
+              <strong>Username:</strong> {{ profile.username }}<br>
+              <span *ngIf="profile.schemaFilePath"><strong>Schema File:</strong> {{ getFileName(profile.schemaFilePath) }}</span><br>
+              <span *ngIf="profile.dataFilePath"><strong>Data File:</strong> {{ getFileName(profile.dataFilePath) }}</span>
+            </p>
+            <button class="btn btn-sm btn-info me-2">Select for Migration</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #noProfiles>
+    <div class="alert alert-warning text-center" role="alert">
+      No connection profiles saved yet. Please go to "Configure Databases" to add source and destination configurations.
+    </div>
+  </ng-template>
+
+  <hr class="my-5">
+
+  <h3 class="text-center text-success mb-4">Data Migration Setup: Table & Attribute Mapping</h3>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h4>Source Database Tables:</h4>
+      <div class="alert alert-info">
+        Select a profile above to load its tables.
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4>Destination Database Tables:</h4>
+      <div class="alert alert-info">
+        Select a profile above to load its tables.
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg" disabled>Start Data Migration (Coming Soon)</button>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+/* src/styles.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* You can add your custom global styles below these directives */
+body {
+  margin: 0;
+  font-family: sans-serif; /* Example: set a default font */
+}
+
+/* Global Tailwind-based button styles for navigation */
+.nav-button {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75;
+}
+
+.nav-button.current-page {
+  @apply bg-blue-900 text-white border border-white cursor-default;
+}

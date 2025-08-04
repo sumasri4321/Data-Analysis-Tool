@@ -1,0 +1,42 @@
+<div class="min-h-screen bg-gray-100 font-inter antialiased">
+  <!-- Tailwind CSS and Inter font imports for global styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Styles for the navigation buttons */
+    .nav-button {
+      @apply bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75;
+    }
+
+    /* Style for the currently active navigation button */
+    .nav-button.active { /* Use 'active' class from routerLinkActive */
+      @apply bg-blue-900 text-white cursor-default;
+    }
+
+    /* General font application */
+    .font-inter {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+
+  <!-- Centralized Navigation Bar -->
+  <nav class="bg-gray-800 p-4 rounded-lg shadow-lg mb-8 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mx-auto mt-4 max-w-6xl">
+    <!-- Using routerLink for Angular's internal navigation -->
+    <a routerLink="/configure" routerLinkActive="active" class="nav-button">Configure</a>
+    <!-- The 'Mock Configure' button is intentionally removed as its route is no longer defined -->
+    <!-- <a routerLink="/mock-configure" routerLinkActive="active" class="nav-button">Mock Configure</a> -->
+    <a routerLink="/mock-dashboard" routerLinkActive="active" class="nav-button">Dashboard</a> <!-- This should be the correct link for your dashboard -->
+    <a routerLink="/sql-executor" routerLinkActive="active" class="nav-button">SQL Executor</a>
+    <!-- Other navigation links (if any) should be uncommented and verified against app.routes.ts -->
+  </nav>
+
+  <!-- This is where your routed components will be displayed -->
+  <div class="p-6"> <!-- Added padding here to give space around routed content -->
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<!-- <div class="container mt-5">
+  <h2 class="text-center text-primary mb-4">Simulated Data Migration Setup (Mock)</h2>
+
+  <div class="card shadow p-4">
+    <h4 class="mb-3">Source Database Host</h4>
+    <div class="mb-3">
+      <label for="sourceHost" class="form-label">Host Name:</label>
+      <input type="text" class="form-control" id="sourceHost" value="source-db.example.com" disabled>
+      <small class="form-text text-muted">This is a dummy input for design purposes.</small>
+    </div>
+
+    <h4 class="mt-4 mb-3">Destination Database Host</h4>
+    <div class="mb-3">
+      <label for="destinationHost" class="form-label">Host Name:</label>
+      <input type="text" class="form-control" id="destinationHost" value="destination-db.example.com" disabled>
+      <small class="form-text text-muted">This is a dummy input for design purposes.</small>
+    </div>
+
+    <div class="d-grid gap-2 mt-4">
+      <button type="button" class="btn btn-primary btn-lg" (click)="navigateToMockDashboard()">Next</button>
+    </div>
+  </div>
+</div> -->
+<div class="container mt-5 font-sans">
+  <!-- REMOVED: Script and Style tags, as they are now in index.html and app.component.ts -->
+  <!-- REMOVED: Navigation bar was here -->
+
+  <h2 class="text-center text-primary mb-4 text-3xl font-bold">Simulated Data Migration Setup (Mock)</h2>
+
+  <div class="card shadow p-4">
+    <h4 class="mb-3 text-xl font-semibold text-gray-800">Source Database Host</h4>
+    <div class="mb-3">
+      <label for="sourceHost" class="form-label">Host Name:</label>
+      <input type="text" class="form-control" id="sourceHost" value="source-db.example.com" disabled>
+      <small class="form-text">This is a dummy input for design purposes.</small>
+    </div>
+
+    <h4 class="mt-4 mb-3 text-xl font-semibold text-gray-800">Destination Database Host</h4>
+    <div class="mb-3">
+      <label for="destinationHost" class="form-label">Host Name:</label>
+      <input type="text" class="form-control" id="destinationHost" value="destination-db.example.com" disabled>
+      <small class="form-text">This is a dummy input for design purposes.</small>
+    </div>
+
+    <div class="d-grid gap-2 mt-4">
+      <!-- Changed href to routerLink for proper Angular navigation -->
+      <button type="button" class="btn btn-primary btn-lg bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out shadow-md w-full" (click)="navigateToMockDashboard()">Next</button>
+    </div>
+  </div>
+</div>
